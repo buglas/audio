@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>白噪音</title>
+</head>
+<body>
+<script>
+    let audioCtx = new AudioContext();
+
+    /*AudioBuffer音频缓冲对象
+    *   channels 声道数
+    *   frameCount 帧数
+    *   sampleRate 采样率
+    * */
+    //声道数量：2为立体声
+    let channels = 2;
+    //音频时长
+    let timeLen=2.0;
+    //采样率
+    let {sampleRate}=audioCtx;
+    //帧数：采样率与音频环境(AudioContext)相同，时长2秒
+    let frameCount = sampleRate*timeLen;
+    //音频缓冲对象，audioCtx.createBuffer(channels, frameCount,sampleRate)
+    let myArrayBuffer = audioCtx.createBuffer(channels, frameCount, sampleRate);
+
+    /*在音频缓冲对象中填充数据(白噪声)
+    *   遍历音频的声道数
+    *   获取声道中的音频数据，getChannelData(channel)
+    *   遍历音频数据
+    *   在音频数据中填充[-1.0,1.0]的随机数
+    * */
+    for (let channel = 0; channel < channels; channel++) {
+        // 这允许我们读取实际音频片段(AudioBuffer)中包含的数据
+        let nowBuffering = myArrayBuffer.getChannelData(channel);
+        for (let i = 0; i < frameCount; i++) {
+            // Math.random() is in [0; 1.0]
+            // audio needs to be in [-1.0; 1.0]
+            nowBuffering[i] = Math.random() * 2 - 1;
+        }
+    }
+
+    /*利用音频上下文对象建立音频源节点 audioCtx.createBufferSource()
+    * 将音频缓冲对象赋值给音频源节点的buffer属性
+    * 将音频源节点连接到音频上下文对象的音频设备上，connect()
+    * 开始播放音频，start()
+    * */
+    let source = audioCtx.createBufferSource();
+    // 把刚才生成的片段加入到 音频片段源节点(AudioBufferSourceNode)。
+    source.buffer = myArrayBuffer;
+    // 把音频源(AudioBufferSourceNode) 连接到上下文对象的终节点
+    source.connect(audioCtx.destination);
+    // 开始播放声源
+    source.start();
+</script>
+</body>
+</html>

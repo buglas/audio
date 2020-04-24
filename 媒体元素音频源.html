@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>媒体元素音频源</title>
+</head>
+<body>
+<audio src="./jmww.mp3" controls autofocus loop></audio>
+<script>
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let myAudio = document.querySelector('audio');
+    // 使用音频上下文对象，建立音量设备
+    let gainNode = audioCtx.createGain();
+    //鼠标在窗口中的位置
+    let CurY;
+    //窗口高度
+    let HEIGHT = window.innerHeight;
+    // 基于鼠标在窗口中的高度比例，设置音量设备的音量值
+    document.onmousemove = function updatePage(event) {
+        CurY = event.clientY;
+        gainNode.gain.value = 1-CurY/HEIGHT;
+    };
+    // 基于audio 元素，建立媒体元素音频源
+    // 这类似于白噪音的audioCtx.createBufferSource() ，都是建立了一种音频源
+    let source = audioCtx.createMediaElementSource(myAudio);
+    // 把音频源连接到音量设备
+    source.connect(gainNode);
+    // 在把音量设备连接到音频上下文对象的终节点
+    gainNode.connect(audioCtx.destination);
+</script>
+</body>
+</html>
